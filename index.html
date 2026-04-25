@@ -10,8 +10,11 @@
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;min-height:100vh;display:flex;justify-content:center}
     .wrap{width:100%;max-width:500px;background:#1a1a1a;min-height:100vh;padding:1rem;color:#fff}
 
-    .hdr{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+    /* Header */
+    .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+    .hdr-left{display:flex;align-items:center;gap:10px}
     .hdr h1{font-size:17px;font-weight:700}
+    .year-badge{font-size:11px;background:#1a3a1a;color:#22c55e;border:1px solid #1a4a1a;padding:3px 10px;border-radius:20px;font-weight:600}
     .sub{font-size:11px;color:#22c55e;font-weight:600;margin-bottom:.75rem}
 
     /* Summary */
@@ -23,6 +26,12 @@
     .sc.blue .v{color:#60a5fa}
     .sc.green .v{color:#22c55e}
     .sc.amber .v{color:#f59e0b}
+
+    /* Progress bar */
+    .progress-wrap{margin-bottom:10px}
+    .progress-label{display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:4px}
+    .progress-bar{height:6px;background:#222;border-radius:10px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:10px;transition:width 0.5s ease}
 
     /* Tabs */
     .tabs{display:flex;background:#222;border-radius:10px;padding:4px;margin-bottom:10px}
@@ -76,18 +85,47 @@
     .dot.warn{background:#f59e0b}
     .dot.err{background:#ef4444}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-    .stxt{font-size:13px;color:#888}
+    .stxt{font-size:13px;color:#888;flex:1}
+
+    /* ── DUPLICATE ALERT OVERLAY ── */
+    .dup-overlay{
+      display:none;position:fixed;inset:0;z-index:999;
+      background:rgba(0,0,0,0.85);
+      align-items:center;justify-content:center;
+      animation:fadeIn 0.2s ease;
+    }
+    .dup-overlay.show{display:flex}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .dup-card{
+      background:#2a1500;border:2px solid #f59e0b;border-radius:16px;
+      padding:1.5rem;margin:1rem;max-width:340px;width:100%;
+      text-align:center;animation:popIn 0.25s ease;
+    }
+    @keyframes popIn{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
+    .dup-icon{font-size:48px;margin-bottom:10px}
+    .dup-title{font-size:18px;font-weight:700;color:#f59e0b;margin-bottom:6px}
+    .dup-name{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+    .dup-adm{font-size:13px;color:#888;margin-bottom:4px}
+    .dup-cls{font-size:13px;color:#666;margin-bottom:14px}
+    .dup-msg{font-size:13px;color:#f59e0b;background:#1a0f00;border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.5}
+    .dup-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#f59e0b;color:#1a0a00;font-size:15px;font-weight:700;cursor:pointer}
+
+    /* ── SUCCESS FLASH ── */
+    .success-flash{
+      display:none;position:fixed;inset:0;z-index:998;
+      background:rgba(34,197,94,0.15);pointer-events:none;
+      animation:flashAnim 0.5s ease forwards;
+    }
+    @keyframes flashAnim{0%{opacity:1}100%{opacity:0}}
 
     /* Result */
     .rbox{display:none;margin-top:12px;border-radius:14px;padding:1rem 1.25rem;border:1px solid #2a2a2a}
     .rbox.new{background:#1a2e1a;border-color:#1a4a1a}
-    .rbox.already{background:#2a2200;border-color:#3a3200}
     .rbox.notfound{background:#2a1a1a;border-color:#4a2a2a}
     .rbox.loading{background:#222}
     .rtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .rlabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
     .rlabel.new{color:#22c55e}
-    .rlabel.already{color:#f59e0b}
     .rlabel.notfound{color:#ef4444}
     .rlabel.loading{color:#666}
     .rbadge{font-size:11px;background:#1a1a1a;color:#555;padding:3px 10px;border-radius:20px}
@@ -97,11 +135,15 @@
     .rsheet{font-size:11px;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:10px}
     .rsheet.girls{background:#3a1a2a;color:#f9a8d4}
     .rsheet.boys{background:#1a2a3a;color:#93c5fd}
+    .racts{margin-top:10px;display:flex;align-items:center;gap:12px}
     .racts button{padding:8px 18px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#ccc;font-size:13px;cursor:pointer}
+    .countdown{font-size:12px;color:#555}
 
     /* History */
     .hist{display:none;margin-top:12px}
-    .htitle{font-size:11px;color:#444;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+    .htitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .htitle span{font-size:11px;color:#444;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+    .htitle button{font-size:11px;color:#444;background:none;border:none;cursor:pointer;padding:2px 8px}
     .hitem{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#1e1e1e;border-radius:8px;margin-bottom:5px;border:1px solid #222}
     .hdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
     .hdot.new{background:#22c55e}
@@ -109,19 +151,44 @@
     .hdot.notfound{background:#ef4444}
     .hadm{font-size:13px;color:#bbb;flex:1;font-weight:500}
     .hname{font-size:12px;color:#555;text-align:right;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .htime{font-size:10px;color:#333;margin-left:4px;white-space:nowrap}
   </style>
 </head>
 <body>
+
+<!-- Duplicate Alert Overlay -->
+<div class="dup-overlay" id="dupOverlay" onclick="closeDupAlert()">
+  <div class="dup-card" onclick="event.stopPropagation()">
+    <div class="dup-icon">⚠️</div>
+    <div class="dup-title">Already Distributed!</div>
+    <div class="dup-name" id="dupName"></div>
+    <div class="dup-adm"  id="dupAdm"></div>
+    <div class="dup-cls"  id="dupCls"></div>
+    <div class="dup-msg">
+      This student's uniform has<br>
+      <strong>already been collected!</strong><br>
+      Do not distribute again.
+    </div>
+    <button class="dup-btn" onclick="closeDupAlert()">OK, Got It</button>
+  </div>
+</div>
+
+<!-- Success Flash -->
+<div class="success-flash" id="successFlash"></div>
+
 <div class="wrap">
 
   <div class="hdr">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
-      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-      <path d="M14 14h3M17 14v3M14 17h3M17 17v3M20 14v3M20 17h-3"/>
-    </svg>
-    <h1>Uniform Distribution</h1>
+    <div class="hdr-left">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        <path d="M14 14h3M17 14v3M14 17h3M17 17v3M20 14v3M20 17h-3"/>
+      </svg>
+      <h1>Uniform Distribution</h1>
+    </div>
+    <span class="year-badge">2026-27</span>
   </div>
-  <p class="sub">Sairam Vidyalaya · 2025-26</p>
+  <p class="sub">Sairam Vidyalaya · CBSE</p>
 
   <!-- Summary -->
   <div class="summary" id="sumBox">
@@ -131,6 +198,17 @@
       <div class="sc amber"><div class="v" id="sPend">…</div><div class="l">Pending</div></div>
     </div>
     <div class="sum-row" id="sheetCards"></div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Overall Progress</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
   </div>
 
   <!-- Tabs -->
@@ -184,7 +262,7 @@
   <!-- Status -->
   <div class="status-bar">
     <div class="dot scanning" id="dot"></div>
-    <span class="stxt" id="stxt">Loading summary…</span>
+    <span class="stxt" id="stxt">Loading…</span>
   </div>
 
   <!-- Result -->
@@ -197,53 +275,114 @@
     <div class="radm"  id="radm"></div>
     <div class="rcls"  id="rcls"></div>
     <span class="rsheet" id="rsheet"></span>
-    <div class="racts" style="margin-top:10px">
+    <div class="racts">
       <button onclick="resumeScan()">Scan Again</button>
+      <span class="countdown" id="countdown"></span>
     </div>
   </div>
 
   <!-- History -->
   <div class="hist" id="hist">
-    <div class="htitle">Recent Scans</div>
+    <div class="htitle">
+      <span>Recent Scans</span>
+      <button onclick="clearHistory()">Clear</button>
+    </div>
     <div id="hlist"></div>
   </div>
 
 </div>
+
 <script>
-  // ── HARDCODED URL ─────────────────────────────────────────
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzIY5wuM6QGuR2H0DeaYhuhFvuH4msHLn5sL4HwgAPjGFdbvgUYnf_JHR0OwG6W19LcIQ/exec';
 
-  // ── STATE ─────────────────────────────────────────────────
   let scanner=null, scanning=false, paused=false, lastVal='';
   let fileScanner=null, selFile=null;
   let curTab='camera', curSheet='all';
   let scanHistory=[];
+  let countdownTimer=null;
+  let audioCtx=null;
 
-  // ── INIT ──────────────────────────────────────────────────
-  window.addEventListener('load', () => {
+  // ── INIT ───────────────────────────────────────────────────
+  window.addEventListener('load',()=>{
     setStatus('Loading summary…','scanning');
     loadSummary();
+    // Init audio context on first tap
+    document.addEventListener('touchstart',initAudio,{once:true});
+    document.addEventListener('click',initAudio,{once:true});
   });
 
-  // ── HELPERS ───────────────────────────────────────────────
-  function setStatus(t, type){
-    document.getElementById('stxt').textContent = t;
-    document.getElementById('dot').className = 'dot' + (type?' '+type:'');
+  function initAudio(){
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   }
-  function show(id, d='block'){ document.getElementById(id).style.display=d; }
-  function hide(id){ document.getElementById(id).style.display='none'; }
 
-  // ── TABS ──────────────────────────────────────────────────
+  // ── BEEP SOUNDS ────────────────────────────────────────────
+  function beep(type){
+    if(!audioCtx) return;
+    const o=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    if(type==='success'){
+      o.frequency.setValueAtTime(880,audioCtx.currentTime);
+      o.frequency.setValueAtTime(1100,audioCtx.currentTime+0.1);
+      g.gain.setValueAtTime(0.3,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);
+      o.start(); o.stop(audioCtx.currentTime+0.3);
+    } else if(type==='duplicate'){
+      o.frequency.setValueAtTime(300,audioCtx.currentTime);
+      o.frequency.setValueAtTime(200,audioCtx.currentTime+0.15);
+      g.gain.setValueAtTime(0.4,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
+      o.start(); o.stop(audioCtx.currentTime+0.4);
+    } else if(type==='error'){
+      o.frequency.setValueAtTime(200,audioCtx.currentTime);
+      g.gain.setValueAtTime(0.3,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);
+      o.start(); o.stop(audioCtx.currentTime+0.3);
+    }
+  }
+
+  // ── HELPERS ────────────────────────────────────────────────
+  function setStatus(t,type){
+    document.getElementById('stxt').textContent=t;
+    document.getElementById('dot').className='dot'+(type?' '+type:'');
+  }
+  function show(id,d='block'){document.getElementById(id).style.display=d;}
+  function hide(id){document.getElementById(id).style.display='none';}
+
+  function flashSuccess(){
+    const el=document.getElementById('successFlash');
+    el.style.display='block';
+    el.style.animation='none';
+    setTimeout(()=>{el.style.animation='flashAnim 0.6s ease forwards';},10);
+    setTimeout(()=>{el.style.display='none';},700);
+  }
+
+  // ── DUPLICATE ALERT ────────────────────────────────────────
+  function showDupAlert(admNo,name,cls){
+    document.getElementById('dupName').textContent=name||admNo;
+    document.getElementById('dupAdm').textContent=admNo;
+    document.getElementById('dupCls').textContent=cls?'Class: '+cls:'';
+    document.getElementById('dupOverlay').classList.add('show');
+    beep('duplicate');
+    if(navigator.vibrate) navigator.vibrate([150,80,150,80,150]);
+  }
+
+  function closeDupAlert(){
+    document.getElementById('dupOverlay').classList.remove('show');
+    setTimeout(resumeScan,500);
+  }
+
+  // ── TABS ───────────────────────────────────────────────────
   function switchTab(t){
     curTab=t;
     document.querySelectorAll('.tab').forEach((b,i)=>
       b.classList.toggle('on',(i===0&&t==='camera')||(i===1&&t==='upload')));
-    document.getElementById('camPanel').style.display = t==='camera'?'block':'none';
-    document.getElementById('upPanel').style.display  = t==='upload'?'block':'none';
+    document.getElementById('camPanel').style.display=t==='camera'?'block':'none';
+    document.getElementById('upPanel').style.display=t==='upload'?'block':'none';
     if(t==='upload') stopCam();
   }
 
-  // ── SHEET FILTER ─────────────────────────────────────────
+  // ── SHEET ──────────────────────────────────────────────────
   function selSheet(s){
     curSheet=s;
     ['sAll','sGirls','sBoys'].forEach(id=>document.getElementById(id).classList.remove('on'));
@@ -251,147 +390,169 @@
     document.getElementById(map[s]).classList.add('on');
   }
 
-  // ── API ───────────────────────────────────────────────────
+  // ── API ────────────────────────────────────────────────────
   async function api(params){
     try{
-      const url = SCRIPT_URL + '?' + new URLSearchParams(params);
-      const r = await fetch(url);
+      const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams(params));
       return await r.json();
-    }catch(e){
-      return {success:false, message:'Network error: '+e.message};
-    }
+    }catch(e){ return{success:false,message:'Network error: '+e.message}; }
   }
 
-  // ── SUMMARY ───────────────────────────────────────────────
+  // ── SUMMARY ────────────────────────────────────────────────
   async function loadSummary(){
-    const d = await api({action:'summary'});
-    if(!d||!d.success){
-      setStatus('Could not load summary','err');
-      return;
-    }
-    let tot=0, dis=0, pen=0;
-    const cards = d.summary.map(s=>{
+    const d=await api({action:'summary'});
+    if(!d||!d.success){ setStatus('Could not load summary','err'); return; }
+    let tot=0,dis=0,pen=0;
+    const cards=d.summary.map(s=>{
       tot+=s.total; dis+=s.distributed; pen+=s.pending;
-      const g = s.sheet.toLowerCase().includes('girl');
-      const pct = s.total>0 ? Math.round(s.distributed/s.total*100) : 0;
+      const g=s.sheet.toLowerCase().includes('girl');
+      const pct=s.total>0?Math.round(s.distributed/s.total*100):0;
       return `<div class="sc" style="flex:1">
         <div class="v" style="font-size:15px;color:${g?'#f9a8d4':'#93c5fd'}">${s.distributed}/${s.total}</div>
         <div class="l">${s.sheet.replace('_LKG_XII','')} · ${pct}%</div>
       </div>`;
     }).join('');
-    document.getElementById('sTotal').textContent = tot;
-    document.getElementById('sDist').textContent  = dis;
-    document.getElementById('sPend').textContent  = pen;
-    document.getElementById('sheetCards').innerHTML = cards;
+    document.getElementById('sTotal').textContent=tot;
+    document.getElementById('sDist').textContent=dis;
+    document.getElementById('sPend').textContent=pen;
+    document.getElementById('sheetCards').innerHTML=cards;
+    const pct=tot>0?Math.round(dis/tot*100):0;
+    document.getElementById('progressFill').style.width=pct+'%';
+    document.getElementById('progressPct').textContent=pct+'%';
     setStatus('Ready — scan or type admission number','ok');
   }
 
-  // ── PROCESS ADMISSION NO ──────────────────────────────────
+  // ── PROCESS ────────────────────────────────────────────────
   async function process(admNo){
-    admNo = admNo.trim().toUpperCase();
+    admNo=admNo.trim().toUpperCase();
     if(!admNo) return;
     paused=true; lastVal=admNo;
-
     setStatus('Looking up '+admNo+'…','scanning');
     showLoading(admNo);
-
-    const sheet = curSheet==='all' ? '' : curSheet;
-    const d = await api({action:'mark', admNo, sheet});
-
+    const sheet=curSheet==='all'?'':curSheet;
+    const d=await api({action:'mark',admNo,sheet});
     if(!d){ setStatus('Network error','err'); return; }
 
     if(d.success){
       if(d.alreadyDone){
-        setStatus('⚠️ Already distributed — '+(d.name||admNo),'warn');
-        showResult('already', admNo, d.name, d.class, d.sheet);
-        if(navigator.vibrate) navigator.vibrate([100,60,100]);
+        // BIG POPUP ALERT for duplicate!
+        setStatus('⚠️ ALREADY DISTRIBUTED — '+(d.name||admNo),'warn');
+        hide('rbox');
+        showDupAlert(admNo, d.name, d.class);
+        addHistory(admNo,d,'already');
       } else {
+        // Success
         setStatus('✓ Distributed! — '+(d.name||admNo),'ok');
-        showResult('new', admNo, d.name, d.class, d.sheet);
-        if(navigator.vibrate) navigator.vibrate([60]);
+        showResult('new',admNo,d.name,d.class,d.sheet);
+        flashSuccess();
+        beep('success');
+        if(navigator.vibrate) navigator.vibrate([80]);
         loadSummary();
+        startCountdown(2); setTimeout(resumeScan,2500);
+        addHistory(admNo,d,'new');
       }
     } else {
       setStatus('❌ Not found: '+admNo,'err');
-      showResult('notfound', admNo, '', '', '');
+      showResult('notfound',admNo,'','','');
+      beep('error');
       if(navigator.vibrate) navigator.vibrate([200]);
+      startCountdown(3); setTimeout(resumeScan,3000);
+      addHistory(admNo,d,'notfound');
     }
-    addHistory(admNo, d);
   }
 
   function showLoading(admNo){
     show('rbox');
-    document.getElementById('rbox').className = 'rbox loading';
-    document.getElementById('rlabel').textContent = 'Checking…';
-    document.getElementById('rlabel').className   = 'rlabel loading';
-    document.getElementById('rname').textContent  = admNo;
-    document.getElementById('radm').textContent   = 'Fetching from Google Sheet…';
-    document.getElementById('rcls').textContent   = '';
-    document.getElementById('rsheet').textContent = '';
-    document.getElementById('rbadge').textContent = '';
+    document.getElementById('rbox').className='rbox loading';
+    document.getElementById('rlabel').textContent='Checking…';
+    document.getElementById('rlabel').className='rlabel loading';
+    document.getElementById('rname').textContent=admNo;
+    document.getElementById('radm').textContent='Fetching from Google Sheet…';
+    document.getElementById('rcls').textContent='';
+    document.getElementById('rsheet').textContent='';
+    document.getElementById('rbadge').textContent='';
   }
 
-  function showResult(type, admNo, name, cls, sheet){
+  function showResult(type,admNo,name,cls,sheet){
     show('rbox');
-    document.getElementById('rbox').className = 'rbox '+type;
-    const labels={new:'✓ Distributed Now',already:'⚠️ Already Distributed',notfound:'❌ Not Found'};
-    document.getElementById('rlabel').textContent = labels[type]||type;
-    document.getElementById('rlabel').className   = 'rlabel '+type;
-    document.getElementById('rname').textContent  = name||admNo;
-    document.getElementById('radm').textContent   = name ? admNo : (type==='notfound'?'Not in sheet':'');
-    document.getElementById('rcls').textContent   = cls ? 'Class: '+cls : '';
-    document.getElementById('rbadge').textContent = type==='new'?'CODE_128':'';
-    const se = document.getElementById('rsheet');
+    document.getElementById('rbox').className='rbox '+type;
+    const labels={new:'✓ Distributed Now',notfound:'❌ Not Found',loading:'Checking…'};
+    document.getElementById('rlabel').textContent=labels[type]||type;
+    document.getElementById('rlabel').className='rlabel '+type;
+    document.getElementById('rname').textContent=name||admNo;
+    document.getElementById('radm').textContent=name?admNo:(type==='notfound'?'Not in sheet':'');
+    document.getElementById('rcls').textContent=cls?'Class: '+cls:'';
+    document.getElementById('rbadge').textContent=type==='new'?'CODE_128':'';
+    const se=document.getElementById('rsheet');
     if(sheet){
-      const g = sheet.toLowerCase().includes('girl');
-      se.textContent  = (g?'👧 ':'👦 ')+sheet;
-      se.className    = 'rsheet '+(g?'girls':'boys');
+      const g=sheet.toLowerCase().includes('girl');
+      se.textContent=(g?'👧 ':'👦 ')+sheet;
+      se.className='rsheet '+(g?'girls':'boys');
     } else { se.textContent=''; }
   }
 
-  function resumeScan(){
-    paused=false; lastVal='';
-    hide('rbox');
-    setStatus('Ready — scan or type admission number','ok');
+  // ── COUNTDOWN ──────────────────────────────────────────────
+  function startCountdown(sec){
+    clearInterval(countdownTimer);
+    let s=sec;
+    const el=document.getElementById('countdown');
+    if(el) el.textContent='Next scan in '+s+'s…';
+    countdownTimer=setInterval(()=>{
+      s--;
+      if(el) el.textContent=s>0?'Next scan in '+s+'s…':'';
+      if(s<=0) clearInterval(countdownTimer);
+    },1000);
   }
 
-  // ── HISTORY ───────────────────────────────────────────────
-  function addHistory(admNo, d){
-    const type = d.success ? (d.alreadyDone?'already':'new') : 'notfound';
-    scanHistory.unshift({admNo, name:d.name||'', type});
-    if(scanHistory.length>20) scanHistory.pop();
+  function resumeScan(){
+    clearInterval(countdownTimer);
+    const el=document.getElementById('countdown');
+    if(el) el.textContent='';
+    paused=false; lastVal='';
+    hide('rbox');
+    setStatus('Ready — hold barcode in box','scanning');
+  }
+
+  // ── HISTORY ────────────────────────────────────────────────
+  function addHistory(admNo,d,type){
+    const now=new Date();
+    const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+    scanHistory.unshift({admNo,name:d.name||'',type,time:t});
+    if(scanHistory.length>30) scanHistory.pop();
     show('hist');
-    document.getElementById('hlist').innerHTML = scanHistory.map(h=>`
+    document.getElementById('hlist').innerHTML=scanHistory.map(h=>`
       <div class="hitem">
         <div class="hdot ${h.type}"></div>
         <div class="hadm">${h.admNo}</div>
-        <div class="hname">${h.name||(h.type==='notfound'?'Not found':'')}</div>
+        <div class="hname">${h.name||(h.type==='notfound'?'Not found':h.type==='already'?'Already done':'')}</div>
+        <div class="htime">${h.time}</div>
       </div>`).join('');
   }
 
-  // ── CAMERA ────────────────────────────────────────────────
+  function clearHistory(){
+    scanHistory=[];
+    hide('hist');
+    document.getElementById('hlist').innerHTML='';
+  }
+
+  // ── CAMERA ─────────────────────────────────────────────────
   function onScan(text){ if(paused||text===lastVal) return; process(text); }
 
   async function startCam(){
     setStatus('Starting camera…','');
     hide('startBtn'); show('stopBtn');
     try{
-      scanner = new Html5Qrcode('reader',{verbose:false});
+      scanner=new Html5Qrcode('reader',{verbose:false});
       await scanner.start(
         {facingMode:'environment'},
-        {fps:25, qrbox:{width:270,height:100},
-         experimentalFeatures:{useBarCodeDetectorIfSupported:true}},
-        onScan, ()=>{}
+        {fps:25,qrbox:{width:270,height:100},experimentalFeatures:{useBarCodeDetectorIfSupported:true}},
+        onScan,()=>{}
       );
       scanning=true; paused=false;
       setStatus('Ready — hold barcode in box','scanning');
     }catch(e){
       try{
-        await scanner.start(
-          {facingMode:'user'},
-          {fps:25, qrbox:{width:270,height:100}},
-          onScan, ()=>{}
-        );
+        await scanner.start({facingMode:'user'},{fps:25,qrbox:{width:270,height:100}},onScan,()=>{});
         scanning=true; paused=false;
         setStatus('Scanning with webcam…','scanning');
       }catch(e2){
@@ -410,17 +571,16 @@
     setStatus('Scanner stopped','');
   }
 
-  // ── MANUAL ────────────────────────────────────────────────
+  // ── MANUAL ─────────────────────────────────────────────────
   function submitManual(){
-    const v = document.getElementById('manInput').value.trim();
+    const v=document.getElementById('manInput').value.trim();
     if(!v) return;
     document.getElementById('manInput').value='';
     process(v);
   }
 
-  // ── UPLOAD ────────────────────────────────────────────────
+  // ── UPLOAD ─────────────────────────────────────────────────
   function onFile(e){ const f=e.target.files[0]; if(f) loadPrev(f); }
-
   function loadPrev(file){
     selFile=file;
     const r=new FileReader();
@@ -431,12 +591,10 @@
     };
     r.readAsDataURL(file);
   }
-
   function clearFile(){
     selFile=null; hide('prevBox'); hide('sfBtn');
     document.getElementById('fileInput').value='';
   }
-
   async function scanFile(){
     if(!selFile) return;
     setStatus('Scanning image…','scanning');
@@ -447,9 +605,7 @@
       fileScanner=new Html5Qrcode('fileReader',{verbose:false});
       const result=await fileScanner.scanFile(selFile,true);
       process(result);
-    }catch(e){
-      setStatus('No barcode found — try a clearer photo','err');
-    }
+    }catch(e){ setStatus('No barcode found — try a clearer photo','err'); }
     document.getElementById('sfBtn').disabled=false;
     document.getElementById('sfBtn').textContent='Scan Barcode from Image';
   }
