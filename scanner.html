@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  FAST LIVE QR SCANNER for the reception counters.
+  This file is NOT pasted into Apps Script. Host it on any https website (school site, GitHub Pages, Netlify …).
+  Google's Apps Script pages cannot use the live camera, a normal web page can.
+  It talks to the Apps Script web app (doPost in Code.gs) – the same reception access code, the same check-in.
+  Open it as  https://your-site/scanner.html#https://script.google.com/macros/s/XXXX/exec
+  (the Admin dashboard shows this full link once SCANNER_URL is set in Code.gs), or type the web app link at login.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reception scanner</title>
+<style>
+  :root { --blue:#1a4f8b; --ink:#1d2433; --muted:#667085; --ok:#12805c; --bad:#c62839; --warn:#b26a00; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Segoe UI", Roboto, Arial, sans-serif; color:var(--ink); background:#eef2f9; }
+  header { background:linear-gradient(120deg,#0b3b3a,#1a4f8b 60%,#5b3fa8); color:#fff; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+  header b { font-size:16px; } header small { display:block; opacity:.85; font-size:12px; }
+  header .sp { flex:1; }
+  header button { background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.4); border-radius:10px; padding:6px 10px; }
+  .wrap { max-width:520px; margin:0 auto; padding:12px; }
+  .card { background:#fff; border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 4px 14px rgba(8,20,50,.08); }
+  .card h2 { font-size:17px; margin:0 0 8px; color:var(--blue); }
+  label.l { display:block; font-weight:600; font-size:14px; margin:10px 0 5px; }
+  input, select { width:100%; padding:12px; font-size:17px; border:1.5px solid #cfd8e8; border-radius:12px; background:#fff; }
+  .btn { display:block; text-align:center; width:100%; border:0; border-radius:14px; padding:14px; font-size:17px; font-weight:700; color:#fff; background:var(--blue); margin-top:10px; cursor:pointer; }
+  .btn.go { background:var(--ok); } .btn.alt { background:#eef2f9; color:var(--blue); } .btn.sm { padding:9px; font-size:14px; }
+  .btn:disabled { opacity:.55; }
+  .row { display:flex; gap:8px; } .row input { flex:1; } .row .btn { width:auto; margin:0; padding:12px 18px; }
+  .stats { display:flex; justify-content:space-between; align-items:center; font-weight:700; }
+  .stats .big { font-size:26px; color:var(--blue); }
+  #reader { width:100%; border-radius:12px; overflow:hidden; margin-top:10px; }
+  .res { border-radius:16px; padding:16px; color:#fff; margin-bottom:12px; }
+  .res.done { background:var(--ok); } .res.already { background:var(--warn); } .res.err { background:var(--bad); } .res.undone, .res.notin { background:#475467; }
+  .res .h { font-size:24px; font-weight:900; } .res .s { font-size:15px; margin-top:4px; opacity:.95; }
+  .team { background:#fff; color:var(--ink); border-radius:12px; padding:12px; margin-top:12px; font-size:15px; line-height:1.5; }
+  .team .rg { font-size:22px; font-weight:900; color:var(--blue); }
+  .msg { margin-top:10px; padding:10px 12px; border-radius:10px; font-size:14px; background:#fff1f2; color:var(--bad); border:1px solid #f7c9cf; }
+  .note { font-size:13px; color:var(--muted); margin-top:6px; }
+  .hide { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div><b id="hTitle">Reception scanner</b><small id="hSub">Team check-in</small></div>
+  <div class="sp"></div>
+  <button id="logout" class="hide">Log out</button>
+</header>
+
+<div class="wrap">
+  <div class="card" id="login">
+    <h2>Reception login</h2>
+    <div id="apiBox" class="hide">
+      <label class="l" for="api">Web app link (ends with /exec)</label>
+      <input type="url" id="api" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec">
+      <div class="note">The registration link of the event – it is on the Admin dashboard.</div>
+    </div>
+    <label class="l" for="code">Reception access code</label>
+    <input type="password" id="code" autocomplete="off" style="text-transform:uppercase">
+    <label class="l" for="counter">Counter</label>
+    <select id="counter"></select>
+    <button class="btn" id="loginBtn">Start</button>
+    <div id="loginMsg"></div>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="card stats"><div>Checked in<br><small class="note">teams present / registered</small></div><div class="big" id="count">–</div></div>
+    <div id="result"></div>
+    <div class="card">
+      <button class="btn go" id="camBtn">📷 Start scanner</button>
+      <div id="reader"></div>
+      <div class="note">Point the camera at the QR code on the slip – each team is checked in automatically, one after another.</div>
+      <div id="camMsg"></div>
+      <label class="l" for="manual">Or type the Reg No</label>
+      <div class="row"><input type="text" id="manual" autocomplete="off" style="text-transform:uppercase" placeholder="e.g. HS0012"><button class="btn" id="manualGo">Check in</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Optional: paste the web app link here so nobody has to type it. The part after # in the page address wins. */
+const WEB_APP_URL = '';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const errText = e => String((e && e.message) || e).replace(/^(Error|Exception):\s*/, '');
+const store = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  clear: k => { try { localStorage.removeItem(k); } catch (e) {} },
+};
+
+/* ---------- which web app ---------- */
+const okApi = u => /^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]+\/exec$/.test(u);
+const cleanApi = u => String(u || '').trim().split(/[?#]/)[0];
+let API = '';
+try { API = cleanApi(decodeURIComponent(location.hash.slice(1))); } catch (e) {}
+if (okApi(API)) store.set('hsApi', API);                 // remembered, so the short address works next time
+else API = okApi(cleanApi(WEB_APP_URL)) ? cleanApi(WEB_APP_URL) : (store.get('hsApi') || '');
+if (!okApi(API)) { API = ''; $('apiBox').classList.remove('hide'); }
+const API0 = API;                                        // '' = the link has to be typed at login
+
+/* One request to the web app. Fails after 40 seconds, so the scanner never stays stuck when the internet drops. */
+async function call(body) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 40000);
+  let res;
+  try { res = await fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', signal: ctl.signal }); }
+  catch (e) { throw new Error(e.name === 'AbortError' ? 'No answer from the server. Check the internet and try again.' : 'No internet, or the web app link is wrong.'); }
+  finally { clearTimeout(timer); }
+  let j;
+  try { j = await res.json(); } catch (e) { throw new Error('The web app did not answer correctly. Check the web app link, and that the latest code is deployed.'); }
+  if (!j || !j.ok) throw new Error((j && j.error) || 'Request failed.');
+  return j.data;
+}
+
+/* ---------- login ---------- */
+const fillCounters = n => { const had = $('counter').value; $('counter').innerHTML = Array.from({ length: n }, (_, i) => '<option value="' + (i + 1) + '">Counter ' + (i + 1) + '</option>').join(''); if (had) $('counter').value = had; };
+fillCounters(10);
+let ME = store.get('hsDesk');
+
+async function start(me) {
+  $('loginBtn').disabled = true; $('loginMsg').innerHTML = '';
+  try {
+    if (!API) {
+      const u = cleanApi($('api').value);
+      if (!okApi(u)) throw new Error('Enter the web app link – it starts with https://script.google.com/macros/s/ and ends with /exec.');
+      API = u;
+    }
+    const s = await call({ fn: 'login', code: me.code });
+    ME = me; store.set('hsDesk', me); store.set('hsApi', API);
+    $('login').classList.add('hide'); $('app').classList.remove('hide'); $('logout').classList.remove('hide');
+    $('hTitle').textContent = s.short || 'Reception scanner';
+    $('hSub').textContent = 'Reception – Counter ' + me.counter;
+    if (s.prefix) $('manual').placeholder = 'e.g. ' + s.prefix + '0012';
+    setCount(s);
+    startCam();
+  } catch (e) {
+    const t = errText(e);
+    if (t === 'ACCESS_DENIED') store.clear('hsDesk');
+    if (!API0 && !store.get('hsApi')) API = '';           // a typed link that did not work is typed again
+    $('login').classList.remove('hide');
+    $('loginMsg').innerHTML = '<div class="msg">' + esc(t === 'ACCESS_DENIED' ? 'Wrong access code.' : t) + '</div>';
+  } finally { $('loginBtn').disabled = false; }
+}
+$('loginBtn').onclick = () => start({ code: $('code').value.trim().toUpperCase(), counter: Number($('counter').value) });
+$('code').onkeydown = e => { if (e.key === 'Enter') $('loginBtn').click(); };
+$('logout').onclick = () => { store.clear('hsDesk'); location.reload(); };
+if (ME && ME.code && API) start(ME);
+
+const setCount = s => { $('count').textContent = s.checked + ' / ' + s.total; };
+
+/* ---------- sound: one high beep = allow entry, two low beeps = look at the screen ---------- */
+let audio = null;
+function beep(good) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    (good ? [0] : [0, 0.22]).forEach(at => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = good ? 1050 : 330; g.gain.value = 0.25;
+      o.connect(g); g.connect(audio.destination);
+      o.start(audio.currentTime + at); o.stop(audio.currentTime + at + 0.15);
+    });
+  } catch (e) {}
+  try { if (navigator.vibrate) navigator.vibrate(good ? 120 : [80, 60, 80]); } catch (e) {}
+}
+
+/* ---------- check-in ---------- */
+let busy = false;
+async function checkIn(text, undo) {
+  if (busy) return;
+  busy = true;
+  $('result').innerHTML = '<div class="res undone"><div class="h">Checking…</div></div>';
+  try {
+    const r = await call({ fn: 'checkin', code: ME.code, counter: ME.counter, reg: text, undo: !!undo });
+    const t = r.team;
+    if (!t || !t.students) throw new Error('Unexpected answer from the server. Please scan again.');
+    setCount(r);
+    const head = { done: '✔ CHECKED IN – allow entry', already: '⚠ ALREADY CHECKED IN', undone: 'Check-in undone', notin: 'Was not checked in' }[r.state];
+    const sub = r.state === 'already' ? 'at ' + t.at + ' by ' + t.by + ' – check the students’ ID cards' : r.state === 'done' ? 'Please check both students’ school ID cards.' : '';
+    $('result').innerHTML = '<div class="res ' + esc(r.state) + '"><div class="h">' + esc(head) + '</div><div class="s">' + esc(sub) + '</div>' +
+      '<div class="team"><div class="rg">' + esc(t.regNo) + '</div><b>' + esc(t.students[0][0]) + '</b> (Class ' + esc(t.students[0][1] + '-' + t.students[0][2]) + ')<br>' +
+      '<b>' + esc(t.students[1][0]) + '</b> (Class ' + esc(t.students[1][1] + '-' + t.students[1][2]) + ')<br>' + esc(t.school) +
+      '<br><small>' + esc(t.comp + ' – ' + t.cat) + '<br>' + esc(t.area) + (t.title ? '<br><i>' + esc(t.title) + '</i>' : '') + '</small>' +
+      (r.state === 'done' || r.state === 'already' ? '<button class="btn alt sm" id="undo">Undo this check-in</button>' : '') + '</div></div>';
+    if ($('undo')) $('undo').onclick = () => { if (confirm('Undo the check-in of ' + t.regNo + '?')) checkIn(t.regNo, true); };
+    beep(r.state === 'done');
+  } catch (e) {
+    if (errText(e) === 'ACCESS_DENIED') { store.clear('hsDesk'); location.reload(); return; }
+    $('result').innerHTML = '<div class="res err"><div class="h">✖ Not checked in</div><div class="s">' + esc(errText(e)) + '</div></div>';
+    beep(false);
+  } finally { busy = false; }
+  window.scrollTo(0, 0);
+}
+$('manualGo').onclick = () => { const v = $('manual').value.trim(); if (v) { checkIn(v); $('manual').value = ''; } };
+$('manual').onkeydown = e => { if (e.key === 'Enter') $('manualGo').click(); };
+
+/* ---------- live QR scanner ----------
+ * The camera stays on and every QR code seen is checked in at once. A slip that stays in front of the camera
+ * is not checked in again until it has been out of view for 3 seconds. */
+const qrLib = new Promise(done => {
+  const urls = ['https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js', 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'];
+  (function load(i) {
+    if (i >= urls.length) return done(false);
+    const s = document.createElement('script');
+    s.src = urls[i]; s.async = true;
+    s.onload = () => done(typeof Html5Qrcode !== 'undefined');
+    s.onerror = () => load(i + 1);
+    document.head.appendChild(s);
+  })(0);
+});
+let qr = null, scanning = false, seen = { text: '', at: 0 }, wake = null;
+function onScan(text) {
+  const now = Date.now();
+  if (text === seen.text && now - seen.at < 3000) { seen.at = now; return; }
+  if (busy) return;
+  seen = { text: text, at: now };
+  checkIn(text);
+}
+async function keepAwake() { try { if (navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
+async function startCam() {
+  if (scanning) return;
+  $('camMsg').innerHTML = '';
+  $('camBtn').disabled = true;
+  try {
+    if (!window.isSecureContext) throw new Error('this page must be opened with https://');
+    if (!(await qrLib)) throw new Error('the QR reader did not load – check the internet and reload');
+    qr = qr || new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], useBarCodeDetectorIfSupported: true, verbose: false });
+    await qr.start({ facingMode: 'environment' },
+      { fps: 15, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.8); return { width: s, height: s }; } }, onScan, () => {});
+    scanning = true;
+    $('camBtn').textContent = '⏹ Stop scanner';
+    keepAwake();
+  } catch (e) {
+    const t = errText(e);
+    $('camMsg').innerHTML = '<div class="msg">' + (/NotAllowed|Permission/i.test(t)
+      ? '<b>The camera is blocked for this page.</b><br>1. Tap the icon beside the address → Permissions → Camera → <b>Allow</b>.<br>2. Phone Settings → Apps → Chrome → Permissions → Camera → <b>Allow</b>.<br>3. Reload and press Start scanner.'
+      : 'The live scanner could not start (' + esc(t) + ').') + ' Until then type the Reg No.</div>';
+  } finally { $('camBtn').disabled = false; }
+}
+async function stopCam() {
+  if (!scanning) return;
+  try { await qr.stop(); } catch (e) {}
+  scanning = false;
+  try { if (wake) await wake.release(); } catch (e) {}
+  $('camBtn').textContent = '📷 Start scanner';
+}
+$('camBtn').onclick = () => scanning ? stopCam() : startCam();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && scanning) keepAwake(); });   // the screen lock is dropped when the tab is hidden
+</script>
+</body>
+</html>
